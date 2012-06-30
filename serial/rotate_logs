@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Dump program directory
+dump_dir=.
+
+# Kill current processes so output files are closed
+killall dump
+killall cat
+
+# Launch new dump process, creating new output files
+$dump_dir/serial_dump &
+

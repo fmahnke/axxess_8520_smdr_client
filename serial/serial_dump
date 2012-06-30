@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Configuration file
+config_file=serial_dump.conf
+
+# Device file
+device=/dev/ttyUSB0
+
+# Get settings
+. $config_file
+
+# Get stdout and stderr forever
+while [ 1 ]; do
+	cat $device >> $output_file 2>> $error_file
+done
+
