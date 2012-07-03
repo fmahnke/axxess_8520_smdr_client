@@ -1,33 +1,35 @@
+#!/usr/bin/env python2
+
 import sqlite3
 import string
 
 import simple_socket
 import sys
 
+import config # configuration file
+
 from axxess_8520_smdr_util import clean_line
 from axxess_8520_smdr_util import insert_line_to_db
 
-DATABASE_NAME = 'sqdatabase2.db'
-RECORD_LENGTH = 86
-AXXESS_IP = "192.168.128.220"
-AXXESS_PORT = 4000
+RECORD_LENGTH = 86 # length of line received by socket in bytes
 
+# Received a filename for logging?
 if (len(sys.argv) > 1):
     raw_file = sys.argv[1]
 
-conn = sqlite3.connect(DATABASE_NAME)
+conn = sqlite3.connect(config.DATABASE_NAME)
 cursor = conn.cursor()
 
 s = simple_socket.SimpleSocket()
-s.connect(AXXESS_IP, AXXESS_PORT)
+s.connect(config.AXXESS_IP, config.AXXESS_PORT)
 
 # Introduce ourselves
 s.send("02000000".decode("hex"))
 s.send("8400".decode("hex"))
 
+# Receive data forever
 while (1):
     line = s.receive(RECORD_LENGTH)
-    print "Sock recv: " + line
 
     line = clean_line(line)
 
@@ -38,10 +40,10 @@ while (1):
             f.write(line)
             f.close()
         
-    status = insert_line_to_db(line, cursor)
+    status = insert_line_to_db(line, cursor, None)
     if (status is True):
         conn.commit()
 
-#s.close()
+s.close()
 conn.close()
 

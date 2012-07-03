@@ -1,32 +1,42 @@
 import datetime
+import logging
 import re
 import string
 import sqlite3
 
 def clean_line(line):
-    # Cleanup incoming line
-    return string.lstrip(line, '\0')
+    """Clean any garbage characters from a line"""
+    # Cleanup 'R' and null characters from beginning of line
+    return string.lstrip(line, 'R\0')
 
-def insert_line_to_db(line, cursor):
+def insert_line_to_db(line, cursor, record_date):
+
+    logging.debug("Line: %s", line)
 
     if (line == '\n'):
-        return
+        return False
+
     m = re.match(r'Station', line)
 
     # Footer?
     if (m is not None):
-        return
+        return False
+
     m = re.match(r'TYP', line)
 
     # Other footer?
     if (m is not None):
-        return
+        return False
 
-    print "Line: " + line
+    # Call Detail Record?
+    logging.debug("Matching line against CDR regex")
     m = re.match(r'([\w/]*?)\s+?([\d\*]+?)\s+?(\d{5})\s+?[RING\s\.]*?([\d\-]+?)\s+?(\d*?)\s+?(\d\d):(\d\d)\s+?S=(\d+?)\s', line)
-    print "Line: " + line
     if (m is None):
-        return
+        logging.info('Line did not match CDR record')
+        return False
+
+    logging.info('Line matched CDR record')
+
     # Type field returned an empty string?
     if (not m.group(1)):
         type = 'RG'
@@ -52,20 +62,25 @@ def insert_line_to_db(line, cursor):
     start_time_mm = int(m.group(7))
     duration = int(m.group(8))
 
+    if (record_date is None):
+        record_date = datetime.date.today()
+
     start_time = datetime.datetime.combine(
-        datetime.date.today(),
+        record_date,
         datetime.time(hour=start_time_hh, minute=start_time_mm))
 
-    # Print record to console for debugging
-    print "Type: "             + type
-    print "Ext: "              + str(ext)
-    print "Trunk: "            + str(trunk)
-    print "Number and stuff: " + str(phone_number)
-    #print "Incoming ext: "    + str(incoming_ext)
-    print "Start time: "       + str(start_time)
-    print "Duration: "         + str(duration)
+    # Log record
+    logging.debug("Type: %s", type)
+    logging.debug("Ext: %s", str(ext))
+    logging.debug("Trunk: %s", str(trunk))
+    logging.debug("Number: %s", str(phone_number))
+    logging.debug("Incoming ext: %s", str(incoming_ext))
+    logging.debug("Start time: %s", str(start_time))
+    logging.debug("Duration: %s", str(duration))
 
+    logging.debug("Executing query")
     cursor.execute("INSERT INTO logviewer_phonerecord VALUES (NULL,'%s',%d,%d,%d,%d,'%s','%s')" % (type, ext, trunk, phone_number, incoming_ext, start_time, datetime.timedelta(seconds=duration)))
+    logging.debug("Cursor.rowcount holds %d", cursor.rowcount)
 
     return True
 
