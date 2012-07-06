@@ -6,7 +6,8 @@ import sqlite3
 
 def clean_line(line):
     """Clean any garbage characters from a line"""
-    # Cleanup 'R' and null characters from beginning of line
+    # Cleanup 'Q' or 'R' and null characters from beginning of line
+    line = string.lstrip(line, 'Q\0')
     return string.lstrip(line, 'R\0')
 
 def insert_line_to_db(line, cursor, record_date):
