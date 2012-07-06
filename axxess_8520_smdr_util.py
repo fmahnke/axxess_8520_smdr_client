@@ -6,11 +6,13 @@ import sqlite3
 
 def clean_line(line):
     """Clean any garbage characters from a line"""
+
     # Cleanup 'Q' or 'R' and null characters from beginning of line
     line = string.lstrip(line, 'Q\0')
     return string.lstrip(line, 'R\0')
 
-def insert_line_to_db(line, cursor, record_date):
+def line_to_cdr(line, record_date):
+    """Convert a line of text to a list containing CDR fields"""
 
     logging.debug("Line: %s", line)
 
@@ -79,9 +81,18 @@ def insert_line_to_db(line, cursor, record_date):
     logging.debug("Start time: %s", str(start_time))
     logging.debug("Duration: %s", str(duration))
 
+    cdr = [type, ext, trunk, phone_number, incoming_ext, start_time,
+           datetime.timedelta(seconds=duration)]
+
+    return cdr
+
+def insert_cdr_record(cdr, cursor):
+    """Insert one CDR field into a database"""
+
     logging.debug("Executing query")
-    cursor.execute("INSERT INTO logviewer_phonerecord VALUES (NULL,'%s',%d,%d,%d,%d,'%s','%s')" % (type, ext, trunk, phone_number, incoming_ext, start_time, datetime.timedelta(seconds=duration)))
+    cursor.execute("INSERT INTO logviewer_phonerecord VALUES (NULL,'%s',%d,%d,%d,%d,'%s','%s')" % (cdr[0], cdr[1], cdr[2], cdr[3], cdr[4], cdr[5], cdr[6], cdr[7]))
+
     logging.debug("Cursor.rowcount holds %d", cursor.rowcount)
 
-    return True
+    return cursor.rowcount
 
