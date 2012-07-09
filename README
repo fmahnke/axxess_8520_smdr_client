@@ -1,2 +1,6 @@
 config.py contains some configuration options that must be set. See the comments in that file for details.
 
+The tcp_ip directory contains axxess_8520_smdr_client.py, which simply connects to the PBX by TCP/IP and collects SMDR data until it is stopped. The data are written to the sqlite database as well as (optionally) to a text file for later processing.
+
+import_axxess_smdr_log.py is available to import an existing text file containing SMDR records to the sqlite database.
+
