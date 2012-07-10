@@ -42,9 +42,12 @@ while (1):
             f.close()
 
     cdr = line_to_cdr(cleaned_line, None) 
-    status = insert_cdr_record(cdr, cursor)
-    if (status is True):
-        conn.commit()
+
+    if (cdr is not False):
+        status = insert_cdr_record(cdr, cursor)
+
+        if (status is 1):
+            conn.commit()
 
 s.close()
 conn.close()

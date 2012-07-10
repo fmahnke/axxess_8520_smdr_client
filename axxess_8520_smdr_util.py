@@ -7,9 +7,9 @@ import sqlite3
 def clean_line(line):
     """Clean any garbage characters from a line"""
 
-    # Cleanup 'Q' or 'R' and null characters from beginning of line
-    line = string.lstrip(line, 'Q\0')
-    return string.lstrip(line, 'R\0')
+    # Cleanup 'Q' or 'R' and null characters from beginning or end of line
+    cleaned_line = string.lstrip(line, 'Q\0')
+    return string.rstrip(cleaned_line, 'R\0')
 
 def file_to_cdr(filename, record_date):
     """Convert a file to a list of CDRs, split on newline"""
