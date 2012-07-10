@@ -9,7 +9,8 @@ import sys
 import config # configuration file
 
 from axxess_8520_smdr_util import clean_line
-from axxess_8520_smdr_util import insert_line_to_db
+from axxess_8520_smdr_util import line_to_cdr
+from axxess_8520_smdr_util import insert_cdr_record
 
 RECORD_LENGTH = 86 # length of line received by socket in bytes
 
@@ -31,16 +32,17 @@ s.send("8400".decode("hex"))
 while (1):
     line = s.receive(RECORD_LENGTH)
 
-    line = clean_line(line)
+    cleaned_line = clean_line(line)
 
     if (raw_file is not None):
         f = open(raw_file, "a")
 
         if (f is not None):
-            f.write(line)
+            f.write(cleaned_line)
             f.close()
-        
-    status = insert_line_to_db(line, cursor, None)
+
+    cdr = line_to_cdr(cleaned_line, None) 
+    status = insert_cdr_record(cdr, cursor)
     if (status is True):
         conn.commit()
 

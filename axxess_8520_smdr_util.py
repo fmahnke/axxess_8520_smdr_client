@@ -11,6 +11,28 @@ def clean_line(line):
     line = string.lstrip(line, 'Q\0')
     return string.lstrip(line, 'R\0')
 
+def file_to_cdr(filename, record_date):
+    """Convert a file to a list of CDRs, split on newline"""
+
+    cdr_list = []
+
+    if (filename is not None):
+        f = open(filename)
+
+        if (f is not None):
+            for line in f:
+                cleaned_line = clean_line(line)
+
+                cdr = line_to_cdr(cleaned_line, record_date)
+                if (cdr is not False):
+                    cdr_list.append(cdr)
+
+            f.close()
+
+            return cdr_list
+
+    return false
+
 def line_to_cdr(line, record_date):
     """Convert a line of text to a list containing CDR fields"""
 
@@ -90,7 +112,7 @@ def insert_cdr_record(cdr, cursor):
     """Insert one CDR field into a database"""
 
     logging.debug("Executing query")
-    cursor.execute("INSERT INTO logviewer_phonerecord VALUES (NULL,'%s',%d,%d,%d,%d,'%s','%s')" % (cdr[0], cdr[1], cdr[2], cdr[3], cdr[4], cdr[5], cdr[6], cdr[7]))
+    cursor.execute("INSERT INTO logviewer_phonerecord VALUES (NULL,'%s',%d,%d,%d,%d,'%s','%s')" % (cdr[0], cdr[1], cdr[2], cdr[3], cdr[4], cdr[5], cdr[6]))
 
     logging.debug("Cursor.rowcount holds %d", cursor.rowcount)
 

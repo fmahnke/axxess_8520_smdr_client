@@ -1,8 +1,15 @@
 import unittest
 from axxess_8520_smdr_util import clean_line
+from axxess_8520_smdr_util import file_to_cdr
 from axxess_8520_smdr_util import line_to_cdr
+from axxess_8520_smdr_util import insert_cdr_record
+import os
+import shutil
+import sqlite3
 
 class test_smdr_functions(unittest.TestCase):
+
+    CDR_FILE = "test_cdr.log"
 
     def test_clean_line(self):
         dirty_line = "R\0\0 Sample line with prefix R"
@@ -11,6 +18,11 @@ class test_smdr_functions(unittest.TestCase):
         dirty_line = "Q\0\0 Sample line with prefix Q"
         cleaned_line = clean_line(dirty_line)
         self.assertEqual(cleaned_line, " Sample line with prefix Q")
+
+    def test_file_to_cdr(self):
+
+        cdr = file_to_cdr(self.CDR_FILE, None)
+        self.assertEqual(len(cdr), 173)
 
     def test_line_to_cdr(self):
         header_1 = "Station Message Detailed Recording                          00:00:04 07-03-2012"
@@ -39,6 +51,37 @@ class test_smdr_functions(unittest.TestCase):
         self.assertTrue(line_to_cdr(incoming_1, None))
         self.assertTrue(line_to_cdr(incoming_2, None))
 
+class test_db_functions(unittest.TestCase):
+
+    EMPTY_DATABASE = "test_sqdatabase_empty.db"
+    DATABASE = "test_sqdatabase.db"
+    CDR_FILE = "test_cdr.log"
+
+    def setUp(self):
+
+        shutil.copyfile(self.EMPTY_DATABASE, self.DATABASE)
+        self.conn = sqlite3.connect(self.DATABASE)
+
+    def test_insert_db(self):
+
+        cdr = file_to_cdr(self.CDR_FILE, None)
+
+        for record in cdr:
+            rowcount = insert_cdr_record(record, self.conn.cursor())
+            self.assertEqual(rowcount, 1)
+
+        self.conn.commit()
+        rows = self.conn.cursor().execute("SELECT * FROM logviewer_phonerecord").fetchall()
+        self.assertEqual(len(rows), 173)
+
+    def tearDown(self):
+
+        self.conn.close()
+        os.remove(self.DATABASE)
+        
 if __name__ == '__main__':
-    unittest.main()
+    suite = unittest.TestLoader().loadTestsFromTestCase(test_smdr_functions)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(test_db_functions)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 

@@ -9,7 +9,8 @@ import sqlite3
 import sys
 
 from axxess_8520_smdr_util import clean_line
-from axxess_8520_smdr_util import insert_line_to_db
+from axxess_8520_smdr_util import line_to_cdr
+from axxess_8520_smdr_util import insert_cdr_record
 
 if (len(sys.argv) > 1):
 	fileWithPath = sys.argv[1]
@@ -38,7 +39,8 @@ f = open(fileWithPath)
 
 for line in f:
     line = clean_line(line)
-    insert_line_to_db(line, cursor, log_date)
+    cdr = line_to_cdr(line, log_date)
+    insert_cdr_record(cdr, cursor)
 
 f.close()
 
