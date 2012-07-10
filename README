@@ -1,3 +1,5 @@
+Client utilities to connect to Axxess 8520 PBXs and retrieve SMDR data. The data can be gathered by serial port connection or TCP/IP connection. The data can be written to a file or to an SQLite database for use with django-pbx-smdr-accounting (http://github.com/fmahnke/django-pbx-smdr-accounting).
+
 config.py contains some configuration options that must be set. See the comments in that file for details.
 
 The tcp_ip directory contains axxess_8520_smdr_client.py, which simply connects to the PBX by TCP/IP and collects SMDR data until it is stopped. The data are written to the sqlite database as well as (optionally) to a text file for later processing.
