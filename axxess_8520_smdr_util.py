@@ -9,7 +9,10 @@ def clean_line(line):
 
     # Cleanup 'Q' or 'R' and null characters from beginning of line
     line = string.lstrip(line, 'Q\0')
-    return string.lstrip(line, 'R\0')
+    line = string.lstrip(line, 'R\0')
+    line = string.rstrip(line, 'Q\0')
+    line = string.rstrip(line, 'R\0')
+    return line
 
 def file_to_cdr(filename, record_date):
     """Convert a file to a list of CDRs, split on newline"""
