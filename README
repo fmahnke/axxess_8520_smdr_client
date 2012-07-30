@@ -4,3 +4,7 @@ The tcp_ip directory contains axxess_8520_smdr_client.py, which simply connects 
 
 import_axxess_smdr_log.py is available to import an existing text file containing SMDR records to the sqlite database.
 
+Both the tcp_ip and serial directories contain Bash scripts that can be
+configured to rotate log collection on an interval. This is useful to start a
+new log file for each day of the month, for example.
+
